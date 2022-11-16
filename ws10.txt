@@ -1,0 +1,143 @@
+[vivian@sjsu ws10]$ cat ws10.txt 
+Script started on 2022-11-15 21:44:43-05:00
+[vivian@sjsu ws10]$ cd ..
+[vivian@sjsu vivian]$ cd ws10
+
+
+#
+# Put the Python program in the same location as your amazon file on your server (you can use scp or sftp). 
+# Then run it as follows (you might need to change the name of the amazon file in the script, if your file is named differently):
+#
+
+[vivian@sjsu ws10]$ ln -s ../amazon_reviews_us_Books_v1_02.tsv 
+[vivian@sjsu ws10]$ time python3 numbers.py
+min 0 max 15835 avg 9.33467921636312
+
+real	0m22.985s
+user	0m18.671s
+sys	0m0.831s
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ 
+
+
+#
+# Write a bash shell script "numbers.sh" that uses awk to do the exact same thing. 
+# You may hardcode the amazon input filename in your script, so it doesn't have to be passed as a parameter (same as in the Python script).
+#
+
+# Create awk script
+[vivian@sjsu ws10]$ vi numbers.awk
+[vivian@sjsu ws10]$ cat numbers.awk
+BEGIN {min=-1; max=-1; sum=0;}
+NR>1 {
+	score=int($9)
+        if (min < 0 || min > score) {
+        	min = score
+        }
+	if (score != 0 && max < score) {
+                max = score
+        }
+	sum+=score
+}
+END { avg=sum/NR; printf("min %d max %d avg %.10f\n", min, max, avg); }
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ 
+
+# Create shell script to call awk script
+[vivian@sjsu ws10]$ vi numbers.sh
+[vivian@sjsu ws10]$ cat numbers.sh
+awk -F'\t' -f numbers.awk amazon_reviews_us_Books_v1_02.tsv
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ 
+
+# Make it executable
+[vivian@sjsu ws10]$ chmod 700 numbers.sh
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ 
+
+
+#
+# Use time to evaluate the runtimes of both the Python program and your shell script on the same amazon customer reviews input file.
+#
+
+[vivian@sjsu ws10]$ time ./numbers.sh 
+min 0 max 15835 avg 9.3346762105
+
+real	0m21.347s
+user	0m21.027s
+sys	0m0.320s
+[vivian@sjsu ws10]$ time ./numbers.sh 
+min 0 max 15835 avg 9.3346762105
+
+real	0m21.051s
+user	0m20.741s
+sys	0m0.310s
+[vivian@sjsu ws10]$ time ./numbers.sh 
+min 0 max 15835 avg 9.3346762105
+
+real	0m21.255s
+user	0m20.845s
+sys	0m0.410s
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ 
+
+
+# Compare with python script
+
+[vivian@sjsu ws10]$ time python3 numbers.py
+min 0 max 15835 avg 9.33467921636312
+
+real	0m19.440s
+user	0m18.776s
+sys	0m0.660s
+[vivian@sjsu ws10]$ time python3 numbers.py
+min 0 max 15835 avg 9.33467921636312
+
+real	0m19.275s
+user	0m18.584s
+sys	0m0.690s
+[vivian@sjsu ws10]$ time python3 numbers.py
+min 0 max 15835 avg 9.33467921636312
+
+real	0m19.325s
+user	0m18.695s
+sys	0m0.630s
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ 
+[vivian@sjsu ws10]$ cat numbers.py
+from itertools import islice
+
+
+with open("amazon_reviews_us_Books_v1_02.tsv") as f:
+    numbers = []
+    for line in islice(f, 1, None): #skip the header row
+        numbers.append(int(line.split("\t")[8]))
+    numbers.sort()
+
+count = len(numbers)
+max_num = max(numbers)
+min_num = min(numbers)
+sum_of_nums = sum(numbers)
+avg = sum_of_nums/float(count)
+
+print("min %s max %s avg %s" % (min_num, max_num, avg ))
+[vivian@sjsu ws10]$ exit
+
+
+#
+# Do you think the Python program or the shell script runs faster on your input file? Answer this question in the ws10.txt file.
+#
+
+The python and shell script take about the same amount of time to run. The python program is slightly faster.
+I believe this is because both spend the most time reading and processing the input into field values.
+
+
+
+
+Script done on 2022-11-15 22:55:34-05:00
